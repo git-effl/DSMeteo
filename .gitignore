@@ -1,8 +1,23 @@
-node_modules/
+# Build artifacts
 build/
 dist/
-coverage/
+*.o
+*.d
+*.map
+*.nds
+*.arm9
+*.arm7
+
+# Web preview bundle files (excluded from native DSi repository)
+src/
+public/
+index.html
+vite.config.ts
+tsconfig.json
+package.json
+package-lock.json
+bun.lock
+metadata.json
+.env.example
+node_modules/
 .DS_Store
-*.log
-.env*
-!.env.example
