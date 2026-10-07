@@ -1,0 +1,6 @@
+{
+  "name": "Nintendo DS Weather",
+  "description": "A minimalist dual-screen Nintendo DS weather application featuring live meteorological conditions, unit switching, custom city search, and authentic DS dual display aesthetic.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
