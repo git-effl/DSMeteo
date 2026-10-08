@@ -9,14 +9,19 @@ on:
 
 jobs:
   build:
+    name: Build Nintendo DSi ROM
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    container:
+      image: skylyrac/blocksds:slim-latest
 
-      - name: Build Nintendo DSi ROM with BlocksDS
-        uses: docker://blocksds/sdk:latest
-        with:
-          args: make
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build DSMeteo ROM
+        run: |
+          make clean || true
+          make
 
       - name: Upload DSMeteo NDS ROM
         uses: actions/upload-artifact@v4
