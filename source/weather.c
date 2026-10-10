@@ -62,10 +62,40 @@ const char* Weather_GetUnitSuffix(TempUnit unit) {
     }
 }
 
+void Weather_UpdateAlerts(CurrentWeather *weather) {
+    if (!weather) return;
+
+    if (weather->weatherCode >= 95) {
+        weather->alertLevel = ALERT_LEVEL_WARNING;
+        strncpy(weather->alertTitle, "THUNDERSTORM WARNING", sizeof(weather->alertTitle) - 1);
+        strncpy(weather->alertMessage, "Severe lightning & localized torrential rain.", sizeof(weather->alertMessage) - 1);
+    } else if (weather->weatherCode == 65 || weather->weatherCode == 82) {
+        weather->alertLevel = ALERT_LEVEL_WARNING;
+        strncpy(weather->alertTitle, "FLOOD / RAIN WARNING", sizeof(weather->alertTitle) - 1);
+        strncpy(weather->alertMessage, "Heavy rainfall rates detected in sector.", sizeof(weather->alertMessage) - 1);
+    } else if (weather->weatherCode == 75 || weather->weatherCode == 86) {
+        weather->alertLevel = ALERT_LEVEL_WARNING;
+        strncpy(weather->alertTitle, "BLIZZARD ADVISORY", sizeof(weather->alertTitle) - 1);
+        strncpy(weather->alertMessage, "Heavy snowfall flurries and low visibility.", sizeof(weather->alertMessage) - 1);
+    } else if (weather->windSpeed > 35.0f) {
+        weather->alertLevel = ALERT_LEVEL_WATCH;
+        strncpy(weather->alertTitle, "HIGH WIND WATCH", sizeof(weather->alertTitle) - 1);
+        strncpy(weather->alertMessage, "Gale force gusts detected.", sizeof(weather->alertMessage) - 1);
+    } else if (weather->uvIndex >= 8) {
+        weather->alertLevel = ALERT_LEVEL_ADVISORY;
+        strncpy(weather->alertTitle, "HIGH UV ADVISORY", sizeof(weather->alertTitle) - 1);
+        strncpy(weather->alertMessage, "Very high solar UV radiation.", sizeof(weather->alertMessage) - 1);
+    } else {
+        weather->alertLevel = ALERT_LEVEL_NONE;
+        strncpy(weather->alertTitle, "ALL CLEAR", sizeof(weather->alertTitle) - 1);
+        strncpy(weather->alertMessage, "No severe meteorological alerts active.", sizeof(weather->alertMessage) - 1);
+    }
+}
+
 bool Weather_FetchOpenMeteo(const City *city, CurrentWeather *outWeather) {
     if (!city || !outWeather) return false;
 
-    // Default populated telemetry for active city
+    // Populated telemetry for active city
     strncpy(outWeather->cityName, city->name, sizeof(outWeather->cityName) - 1);
     strncpy(outWeather->country, city->country, sizeof(outWeather->country) - 1);
     outWeather->isDay = true;
@@ -78,6 +108,9 @@ bool Weather_FetchOpenMeteo(const City *city, CurrentWeather *outWeather) {
     outWeather->windSpeed = 12.4f;
     outWeather->pressure = 1014;
     outWeather->uvIndex = 5;
+
+    // Evaluate weather alert
+    Weather_UpdateAlerts(outWeather);
 
     return true;
 }

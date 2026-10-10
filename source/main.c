@@ -3,7 +3,7 @@
 #include "weather.h"
 #include "graphics.h"
 
-// Simulated libnds types if compiling outside devkitARM toolchain
+// Nintendo DS hardware headers
 #ifdef __NDS__
 #include <nds.h>
 #include <dswifi9.h>
@@ -17,16 +17,17 @@ typedef struct { int x; int y; } touchPosition;
 #define KEY_LEFT   (1 << 5)
 #define KEY_UP     (1 << 6)
 #define KEY_DOWN   (1 << 7)
+#define KEY_R      (1 << 8)
+#define KEY_L      (1 << 9)
+#define KEY_X      (1 << 10)
+#define KEY_Y      (1 << 11)
 #define KEY_TOUCH  (1 << 12)
 #endif
 
-int main(void) {
-    int activeCityIndex = 0;
-    TempUnit activeUnit = UNIT_CELSIUS;
-    CurrentWeather currentWeather;
-
-    // Load initial weather data for active city
-    Weather_FetchOpenMeteo(&DEFAULT_CITIES[activeCityIndex], &currentWeather);
+static void DisplayMeteoScreen(const CurrentWeather *currentWeather, TempUnit activeUnit) {
+    #ifdef __NDS__
+    consoleClear();
+    #endif
 
     printf("==========================================\n");
     printf("   DSMeteo\n");
@@ -34,20 +35,42 @@ int main(void) {
     printf("==========================================\n\n");
 
     printf("TOP SCREEN:\n");
-    printf("Location:     %s, %s\n", currentWeather.cityName, currentWeather.country);
+    printf("Location:     %s, %s\n", currentWeather->cityName, currentWeather->country);
     printf("Temperature:  %.1f%s\n", 
-           Weather_ConvertTemp(currentWeather.temperature, activeUnit), 
+           Weather_ConvertTemp(currentWeather->temperature, activeUnit), 
            Weather_GetUnitSuffix(activeUnit));
-    printf("Condition:    %s\n", currentWeather.conditionText);
-    printf("Humidity:     %d%%\n", currentWeather.humidity);
-    printf("Wind Speed:   %.1f km/h\n", currentWeather.windSpeed);
-    printf("Pressure:     %d hPa\n\n", currentWeather.pressure);
+    printf("Condition:    %s\n", currentWeather->conditionText);
+    printf("Alert Level:  [%s]\n", currentWeather->alertTitle);
+    printf("Alert Info:   %s\n", currentWeather->alertMessage);
+    printf("Humidity:     %d%%\n", currentWeather->humidity);
+    printf("Wind Speed:   %.1f km/h\n", currentWeather->windSpeed);
+    printf("Pressure:     %d hPa\n\n", currentWeather->pressure);
 
     printf("BOTTOM SCREEN (TOUCH CONTROLS):\n");
     printf("[1] USE CITY: Switch between saved cities\n");
     printf("[2] ADD CITY: Add location via Open-Meteo API\n");
     printf("[3] INDICATORS: [Celsius] [Fahrenheit] [Kelvin]\n");
     printf("[4] LAUNCHER: Exit to Launcher\n\n");
+}
+
+int main(void) {
+    #ifdef __NDS__
+    // Power on 2D engines and initialize text console for real DS/DSi hardware
+    powerOn(POWER_ALL_2D);
+    videoSetMode(MODE_0_2D);
+    videoSetModeSub(MODE_0_2D);
+    vramSetBankA(VRAM_A_MAIN_BG);
+    vramSetBankC(VRAM_C_SUB_BG);
+    consoleDemoInit();
+    #endif
+
+    int activeCityIndex = 0;
+    TempUnit activeUnit = UNIT_CELSIUS;
+    CurrentWeather currentWeather;
+
+    // Load initial weather data and alerts
+    Weather_FetchOpenMeteo(&DEFAULT_CITIES[activeCityIndex], &currentWeather);
+    DisplayMeteoScreen(&currentWeather, activeUnit);
 
     // Main interactive game loop for Nintendo DS / DSi hardware
     while (1) {
@@ -57,20 +80,42 @@ int main(void) {
         uint32_t keysDown = keysDown();
         touchPosition touch;
 
-        // D-Pad / Touch controls
-        if (keysDown & KEY_UP) {
+        // D-Pad / Shoulder buttons to cycle cities
+        if (keysDown & (KEY_UP | KEY_RIGHT | KEY_R)) {
             activeCityIndex = (activeCityIndex + 1) % DEFAULT_CITIES_COUNT;
             Weather_FetchOpenMeteo(&DEFAULT_CITIES[activeCityIndex], &currentWeather);
+            DisplayMeteoScreen(&currentWeather, activeUnit);
         }
-        if (keysDown & KEY_X) {
+        if (keysDown & (KEY_DOWN | KEY_LEFT | KEY_L)) {
+            activeCityIndex = (activeCityIndex + DEFAULT_CITIES_COUNT - 1) % DEFAULT_CITIES_COUNT;
+            Weather_FetchOpenMeteo(&DEFAULT_CITIES[activeCityIndex], &currentWeather);
+            DisplayMeteoScreen(&currentWeather, activeUnit);
+        }
+        // Button X or Y cycles temperature indicator units
+        if (keysDown & (KEY_X | KEY_Y)) {
             activeUnit = (activeUnit + 1) % 3;
+            DisplayMeteoScreen(&currentWeather, activeUnit);
         }
-        if (keysDown & KEY_START) {
-            break; // Exit to DSi Launcher
+        // Button START or B exits
+        if (keysDown & (KEY_START | KEY_B)) {
+            break;
         }
+        // Touch screen interaction
         if (keysDown & KEY_TOUCH) {
             touchRead(&touch);
-            // Process touch zones for: Add City, Use City, Unit, Exit
+            if (touch.py > 110 && touch.py < 145) {
+                // [1] USE CITY
+                activeCityIndex = (activeCityIndex + 1) % DEFAULT_CITIES_COUNT;
+                Weather_FetchOpenMeteo(&DEFAULT_CITIES[activeCityIndex], &currentWeather);
+                DisplayMeteoScreen(&currentWeather, activeUnit);
+            } else if (touch.py >= 145 && touch.py < 175) {
+                // [3] INDICATORS
+                activeUnit = (activeUnit + 1) % 3;
+                DisplayMeteoScreen(&currentWeather, activeUnit);
+            } else if (touch.py >= 175) {
+                // [4] LAUNCHER
+                break;
+            }
         }
         #else
         break;

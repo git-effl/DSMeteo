@@ -19,6 +19,13 @@ typedef enum {
     WEATHER_NIGHT = 6
 } WeatherCategory;
 
+typedef enum {
+    ALERT_LEVEL_NONE = 0,
+    ALERT_LEVEL_ADVISORY = 1,
+    ALERT_LEVEL_WATCH = 2,
+    ALERT_LEVEL_WARNING = 3
+} AlertLevel;
+
 typedef struct {
     const char *name;
     const char *country;
@@ -39,6 +46,9 @@ typedef struct {
     int pressure;
     int uvIndex;
     bool isDay;
+    AlertLevel alertLevel;
+    char alertTitle[64];
+    char alertMessage[128];
 } CurrentWeather;
 
 // Default preloaded cities
@@ -52,5 +62,6 @@ const char* Weather_GetConditionLabel(int code, bool isDay);
 WeatherCategory Weather_GetCategory(int code, bool isDay);
 float Weather_ConvertTemp(float celsius, TempUnit unit);
 const char* Weather_GetUnitSuffix(TempUnit unit);
+void Weather_UpdateAlerts(CurrentWeather *weather);
 
 #endif // WEATHER_H

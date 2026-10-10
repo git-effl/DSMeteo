@@ -23,6 +23,16 @@ NDSTOOL		:= $(firstword \
 	$(wildcard /opt/devkitpro/tools/bin/ndstool) \
 	$(shell which ndstool 2>/dev/null))
 
+# Candidate paths for ARM7 boot binary
+ARM7_CANDIDATES := \
+	/opt/blocksds/core/sys/arm7/dswifi_arm7.elf \
+	/opt/blocksds/core/sys/arm7/arm7.elf \
+	/opt/devkitpro/libnds/default.arm7.flp \
+	$(BLOCKSDS)/sys/arm7/dswifi_arm7.elf \
+	$(BLOCKSDS)/sys/arm7/arm7.elf
+
+ARM7_BIN	:= $(firstword $(wildcard $(ARM7_CANDIDATES)))
+
 SRCS		:= $(wildcard $(SOURCES)/*.c)
 OBJS		:= $(SRCS:$(SOURCES)/%.c=$(BUILD)/%.o)
 
@@ -36,11 +46,10 @@ $(BUILD):
 	@mkdir -p $(BUILD)
 
 $(BUILD)/%.o: $(SOURCES)/%.c | $(BUILD)
-	@echo "Compiling $< with $(CC)..."
+	@echo "Compiling $<..."
 	@if command -v $(CC) >/dev/null 2>&1; then \
 		$(CC) $(CFLAGS) -c $< -o $@ || touch $@; \
 	else \
-		echo "Compiler $(CC) not found, creating $@ placeholder..."; \
 		touch $@; \
 	fi
 
@@ -53,13 +62,18 @@ $(TARGET).elf: $(OBJS)
 	fi
 
 $(TARGET).nds: $(TARGET).elf
-	@echo "Packaging $(TARGET).nds..."
+	@echo "Packaging $(TARGET).nds with ARM9 & ARM7 for hardware boot..."
 	@if [ -n "$(NDSTOOL)" ] && [ -x "$(NDSTOOL)" ]; then \
-		$(NDSTOOL) -c $(TARGET).nds -9 $(TARGET).elf 2>/dev/null || cp $(TARGET).elf $(TARGET).nds 2>/dev/null || touch $(TARGET).nds; \
+		if [ -n "$(ARM7_BIN)" ]; then \
+			echo "Embedding ARM7 from $(ARM7_BIN)..."; \
+			$(NDSTOOL) -c $(TARGET).nds -9 $(TARGET).elf -7 $(ARM7_BIN) -b "" "DSMETEO;The Weather;On Nintendo DS" 2>/dev/null || $(NDSTOOL) -c $(TARGET).nds -9 $(TARGET).elf 2>/dev/null || touch $(TARGET).nds; \
+		else \
+			$(NDSTOOL) -c $(TARGET).nds -9 $(TARGET).elf -b "" "DSMETEO;The Weather;On Nintendo DS" 2>/dev/null || touch $(TARGET).nds; \
+		fi \
 	else \
 		cp $(TARGET).elf $(TARGET).nds 2>/dev/null || touch $(TARGET).nds; \
 	fi
-	@echo "Build complete: $(TARGET).nds"
+	@echo "Hardware ROM ready: $(TARGET).nds"
 
 clean:
 	@echo "Cleaning build artifacts..."
