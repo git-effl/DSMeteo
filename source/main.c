@@ -81,31 +81,31 @@ int main(void) {
         #ifdef __NDS__
         swiWaitForVBlank();
         scanKeys();
-        uint32_t keysDown = keysDown();
+        uint32_t kDown = keysDown();
         touchPosition touch;
 
         // D-Pad / Shoulder buttons to cycle cities
-        if (keysDown & (KEY_UP | KEY_RIGHT | KEY_R)) {
+        if (kDown & (KEY_UP | KEY_RIGHT | KEY_R)) {
             activeCityIndex = (activeCityIndex + 1) % DEFAULT_CITIES_COUNT;
             Weather_FetchOpenMeteo(&DEFAULT_CITIES[activeCityIndex], &currentWeather);
             DisplayMeteoScreen(&currentWeather, activeUnit);
         }
-        if (keysDown & (KEY_DOWN | KEY_LEFT | KEY_L)) {
+        if (kDown & (KEY_DOWN | KEY_LEFT | KEY_L)) {
             activeCityIndex = (activeCityIndex + DEFAULT_CITIES_COUNT - 1) % DEFAULT_CITIES_COUNT;
             Weather_FetchOpenMeteo(&DEFAULT_CITIES[activeCityIndex], &currentWeather);
             DisplayMeteoScreen(&currentWeather, activeUnit);
         }
         // Button X or Y cycles temperature indicator units
-        if (keysDown & (KEY_X | KEY_Y)) {
+        if (kDown & (KEY_X | KEY_Y)) {
             activeUnit = (activeUnit + 1) % 3;
             DisplayMeteoScreen(&currentWeather, activeUnit);
         }
         // Button START or B exits
-        if (keysDown & (KEY_START | KEY_B)) {
+        if (kDown & (KEY_START | KEY_B)) {
             break;
         }
         // Touch screen interaction
-        if (keysDown & KEY_TOUCH) {
+        if (kDown & KEY_TOUCH) {
             touchRead(&touch);
             if (touch.py > 110 && touch.py < 145) {
                 // [1] USE CITY
