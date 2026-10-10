@@ -1,6 +1,6 @@
-# DSMeteo - Nintendo DSi Weather Application
+# DSMeteo
 
-**DSMeteo** is a lightweight, modern weather application designed for the **Nintendo DS and Nintendo DSi**.
+**DSMeteo** weather application designed for the **Nintendo DS and Nintendo DSi**.
 
 ## Features
 
@@ -13,7 +13,7 @@
     - **Use City**: Fast switching between saved/preset cities.
     - **Add City**: Search and add cities worldwide.
     - **Indicators**: Instant toggle between Celsius (°C), Fahrenheit (°F), and Kelvin (K).
-    - **DSi Menu**: Exit to the Nintendo DSi home launcher.
+    - **Launcher**: Exit to the launcher.
 
 ## Building from Source
 
@@ -25,6 +25,12 @@ make
 ```
 
 The resulting `DSMeteo.nds` can be launched on real hardware via **TWiLight Menu++**, **Unlaunch**, or standard DS flashcards.
+
+## LLM Usage
+
+LLM's we're used to produce this app. You might incounter bugs when using the app. In the future i'll add App Info on the Makefile.
+
+
 
 ## License
 
