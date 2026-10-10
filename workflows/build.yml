@@ -28,10 +28,14 @@ jobs:
         run: |
           make clean || true
           make -j$(nproc)
-          ls -lh DSMeteo.nds
+          ls -la
+          cp -v *.nds DSMeteo.nds || true
+          ls -lh *.nds
 
       - name: Upload DSMeteo NDS ROM
         uses: actions/upload-artifact@v4
         with:
           name: DSMeteo-nds
-          path: DSMeteo.nds
+          path: |
+            DSMeteo.nds
+            *.nds

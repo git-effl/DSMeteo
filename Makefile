@@ -7,10 +7,11 @@ BLOCKSDS ?= /opt/blocksds/core
 # User-defined values
 # ===================
 
+NAME := DSMeteo
 GAME_TITLE := DSMeteo
 GAME_SUBTITLE := The Weather, On your Nintendo DS
 GAME_AUTHOR := effL
-GAME_ICON :=icon.bmp
+GAME_ICON := icon.bmp
 
 # Source code paths
 # =================
