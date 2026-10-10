@@ -11,19 +11,20 @@ jobs:
   build:
     name: Build Nintendo DS ROM
     runs-on: ubuntu-latest
+    container:
+      image: skylyrac/blocksds:dev-latest
+      env:
+        PATH: /opt/wonderful/toolchain/gcc-arm-none-eabi/bin:/opt/wonderful/bin:/opt/blocksds/core/tools/ndstool:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        BLOCKSDS: /opt/blocksds/core
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install ARM GCC Toolchain & Build Tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential gcc-arm-none-eabi libnewlib-arm-none-eabi
-
       - name: Build DSMeteo ROM
         run: |
-          make clean
+          git config --global --add safe.directory "$GITHUB_WORKSPACE" || true
+          make clean || true
           make
 
       - name: Upload DSMeteo NDS ROM
