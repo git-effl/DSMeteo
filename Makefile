@@ -9,7 +9,7 @@ BLOCKSDS ?= /opt/blocksds/core
 
 GAME_TITLE := DSMeteo
 GAME_SUBTITLE := The Weather, On your Nintendo DS
-GAME_AUTHOR := Gemini
+GAME_AUTHOR := effL
 
 # Source code paths
 # =================
