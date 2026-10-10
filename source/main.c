@@ -29,8 +29,8 @@ int main(void) {
     Weather_FetchOpenMeteo(&DEFAULT_CITIES[activeCityIndex], &currentWeather);
 
     printf("==========================================\n");
-    printf("   Nintendo DSi Weather (DSMeteo)\n");
-    printf("   Open-Meteo REST API Engine\n");
+    printf("   DSMeteo\n");
+    printf("   The Weather,On your Nintendo DS.\n");
     printf("==========================================\n\n");
 
     printf("TOP SCREEN:\n");
@@ -47,7 +47,7 @@ int main(void) {
     printf("[1] USE CITY: Switch between saved cities\n");
     printf("[2] ADD CITY: Add location via Open-Meteo API\n");
     printf("[3] INDICATORS: [Celsius] [Fahrenheit] [Kelvin]\n");
-    printf("[4] DSi MENU: Exit to Nintendo DSi Launcher\n\n");
+    printf("[4] LAUNCHER: Exit to Launcher\n\n");
 
     // Main interactive game loop for Nintendo DS / DSi hardware
     while (1) {
