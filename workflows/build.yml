@@ -14,18 +14,21 @@ jobs:
     container:
       image: skylyrac/blocksds:dev-latest
       env:
-        PATH: /opt/wonderful/toolchain/gcc-arm-none-eabi/bin:/opt/wonderful/bin:/opt/blocksds/core/tools/ndstool:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
         BLOCKSDS: /opt/blocksds/core
+        PATH: /opt/wonderful/toolchain/gcc-arm-none-eabi/bin:/opt/wonderful/bin:/opt/blocksds/core/tools/ndstool:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Safe git directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE" || true
+
       - name: Build DSMeteo ROM
         run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE" || true
           make clean || true
-          make
+          make -j$(nproc)
+          ls -lh DSMeteo.nds
 
       - name: Upload DSMeteo NDS ROM
         uses: actions/upload-artifact@v4
