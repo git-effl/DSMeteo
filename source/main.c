@@ -100,6 +100,12 @@ int main(void) {
             activeUnit = (activeUnit + 1) % 3;
             DisplayMeteoScreen(&currentWeather, activeUnit);
         }
+        // Button A or SELECT triggers [2] ADD CITY
+        if (kDown & (KEY_A | KEY_SELECT)) {
+            activeCityIndex = (activeCityIndex + 1) % DEFAULT_CITIES_COUNT;
+            Weather_FetchOpenMeteo(&DEFAULT_CITIES[activeCityIndex], &currentWeather);
+            DisplayMeteoScreen(&currentWeather, activeUnit);
+        }
         // Button START or B exits
         if (kDown & (KEY_START | KEY_B)) {
             break;
@@ -107,12 +113,17 @@ int main(void) {
         // Touch screen interaction
         if (kDown & KEY_TOUCH) {
             touchRead(&touch);
-            if (touch.py > 110 && touch.py < 145) {
+            if (touch.py > 90 && touch.py < 125) {
                 // [1] USE CITY
                 activeCityIndex = (activeCityIndex + 1) % DEFAULT_CITIES_COUNT;
                 Weather_FetchOpenMeteo(&DEFAULT_CITIES[activeCityIndex], &currentWeather);
                 DisplayMeteoScreen(&currentWeather, activeUnit);
-            } else if (touch.py >= 145 && touch.py < 175) {
+            } else if (touch.py >= 125 && touch.py < 150) {
+                // [2] ADD CITY
+                activeCityIndex = (activeCityIndex + 2) % DEFAULT_CITIES_COUNT;
+                Weather_FetchOpenMeteo(&DEFAULT_CITIES[activeCityIndex], &currentWeather);
+                DisplayMeteoScreen(&currentWeather, activeUnit);
+            } else if (touch.py >= 150 && touch.py < 175) {
                 // [3] INDICATORS
                 activeUnit = (activeUnit + 1) % 3;
                 DisplayMeteoScreen(&currentWeather, activeUnit);
