@@ -4,8 +4,9 @@
 #include "weather.h"
 #include <stdint.h>
 
-// Nintendo DS 15-bit BGR colors (0 - 31 per channel)
-#define RGB15(r, g, b)  ((r) | ((g) << 5) | ((b) << 10) | (1 << 15))
+#ifndef RGB15
+#define RGB15(r, g, b)  ((r) | ((g) << 5) | ((b) << 10))
+#endif
 
 typedef struct {
     uint16_t skyColorTop;

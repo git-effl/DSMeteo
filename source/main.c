@@ -6,7 +6,11 @@
 // Nintendo DS hardware headers
 #ifdef __NDS__
 #include <nds.h>
+#if defined(__has_include)
+#if __has_include(<dswifi9.h>)
 #include <dswifi9.h>
+#endif
+#endif
 #else
 typedef struct { int x; int y; } touchPosition;
 #define KEY_A      (1 << 0)
