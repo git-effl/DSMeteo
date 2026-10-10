@@ -9,18 +9,21 @@ on:
 
 jobs:
   build:
-    name: Build Nintendo DSi ROM
+    name: Build Nintendo DS ROM
     runs-on: ubuntu-latest
-    container:
-      image: skylyrac/blocksds:slim-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install ARM GCC Toolchain & Build Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential gcc-arm-none-eabi libnewlib-arm-none-eabi
+
       - name: Build DSMeteo ROM
         run: |
-          make clean || true
+          make clean
           make
 
       - name: Upload DSMeteo NDS ROM

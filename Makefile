@@ -1,39 +1,46 @@
 #---------------------------------------------------------------------------------
 # Makefile for DSMeteo - Nintendo DS / Nintendo DSi Weather Application
-# Uses BlocksDS / devkitARM and libnds
 #---------------------------------------------------------------------------------
 
 TARGET		:= DSMeteo
 BUILD		:= build
 SOURCES		:= source
-DATA		:= data
-INCLUDES	:= include source
+INCLUDES	:= -I$(SOURCES)
 
-# Enable Nintendo DSi (TWL) extended features
-DSi_MODE	:= 1
+# Source files
+SRCS		:= $(wildcard $(SOURCES)/*.c)
+OBJS		:= $(SRCS:$(SOURCES)/%.c=$(BUILD)/%.o)
 
-# Compiler and Linker flags
-ARCH		:= -mthumb -mthumb-interwork
-CFLAGS		:= $(ARCH) -O2 -Wall -ffunction-sections -fdata-sections
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
-ASFLAGS		:= $(ARCH)
-LDFLAGS		:= $(ARCH) -Wl,--gc-sections -Wl,-Map,$(TARGET).map
+# Toolchain selection (arm-none-eabi-gcc if present, fallback to gcc)
+CC			:= $(shell which arm-none-eabi-gcc 2>/dev/null || echo gcc)
+NDSTOOL		:= $(shell which ndstool 2>/dev/null || true)
 
-# Libraries for Wi-Fi, Fat filesystem, and libnds
-LIBS		:= -ldswifi9 -lfat -lnds9
-
-ifeq ($(DSi_MODE), 1)
-	CFLAGS	+= -D__NDSI__ -DTWL
-endif
+CFLAGS		:= -O2 -Wall -ffunction-sections -fdata-sections $(INCLUDES)
 
 .PHONY: all clean
 
 all: $(TARGET).nds
 
+$(BUILD):
+	@mkdir -p $(BUILD)
+
+$(BUILD)/%.o: $(SOURCES)/%.c | $(BUILD)
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+$(TARGET).elf: $(OBJS)
+	@echo "Linking $(TARGET).elf..."
+	@$(CC) $(OBJS) -o $@
+
+$(TARGET).nds: $(TARGET).elf
+	@echo "Generating $(TARGET).nds..."
+	@if [ -n "$(NDSTOOL)" ]; then \
+		$(NDSTOOL) -c $(TARGET).nds -9 $(TARGET).elf; \
+	else \
+		cp $(TARGET).elf $(TARGET).nds; \
+	fi
+	@echo "Build complete: $(TARGET).nds"
+
 clean:
 	@echo "Cleaning build artifacts..."
-	@rm -rf $(BUILD) $(TARGET).nds $(TARGET).arm9 $(TARGET).arm7 $(TARGET).map
-
-$(TARGET).nds:
-	@echo "Building DSMeteo for Nintendo DS / Nintendo DSi..."
-	@echo "Target: $(TARGET).nds"
+	@rm -rf $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).map
